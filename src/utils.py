@@ -1,6 +1,7 @@
 import more_itertools as mit
 import numpy as np
 from parse import parse
+from queue import SimpleQueue
 from typing import Callable, Iterable, List, Optional, TypeVar
 
 
@@ -37,6 +38,52 @@ def parse_line_groups(lines: Iterable[str], fmts: Iterable[str], separator=""):
         parse_lines(line_group, fmt) if fmt else line_group
         for fmt, line_group in zip(fmts, split_lines(lines, separator), strict=True)
     )
+
+
+def bitsum(n: int) -> int:
+    p = 0
+    while n > 0:
+        p += n & 1
+        n >>= 1
+    return p
+
+
+V = TypeVar("V")
+
+
+def shortest_paths(s: V, get_neighbors: Callable[[V], Iterable[V]], maxdist=-1):
+    """
+    Compute length of shortest path from source `s` to every other node visitable from `s`.
+    """
+    q: SimpleQueue[V] = SimpleQueue()
+    q.put(s)
+    dists = {s: 0}
+    while not q.empty():
+        v = q.get()
+        for w in get_neighbors(v):
+            if w not in dists:
+                dists[w] = dists[v] + 1
+                if maxdist < 0 or dists[w] < maxdist:
+                    q.put(w)
+    return dists
+
+
+def shortest_path(s: V, t: V, get_neighbors: Callable[[V], Iterable[V]]):
+    """
+    Compute length of shortest path from source `s` to target `t`.
+    """
+    q: SimpleQueue[V] = SimpleQueue()
+    q.put(s)
+    dists = {s: 0}
+    while not q.empty():
+        v = q.get()
+        for w in get_neighbors(v):
+            if w == t:
+                return dists[v] + 1
+            if w not in dists:
+                dists[w] = dists[v] + 1
+                q.put(w)
+    raise RuntimeError(f"{t} is not reachable from {s}")
 
 
 class IntGrid:
