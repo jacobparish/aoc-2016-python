@@ -6,5 +6,4 @@ Still have to do:
 - 11
 - 17
 - 22
-- 24
 - 25
