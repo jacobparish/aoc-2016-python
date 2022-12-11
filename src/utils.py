@@ -51,7 +51,9 @@ def bitsum(n: int) -> int:
 V = TypeVar("V")
 
 
-def shortest_paths(s: V, get_neighbors: Callable[[V], Iterable[V]], maxdist=-1):
+def shortest_paths(
+    s: V, t: Optional[V], get_neighbors: Callable[[V], Iterable[V]], maxdist: int = -1
+):
     """
     Compute length of shortest path from source `s` to every other node visitable from `s`.
     """
@@ -63,6 +65,8 @@ def shortest_paths(s: V, get_neighbors: Callable[[V], Iterable[V]], maxdist=-1):
         for w in get_neighbors(v):
             if w not in dists:
                 dists[w] = dists[v] + 1
+                if t is not None and w == t:
+                    return dists
                 if maxdist < 0 or dists[w] < maxdist:
                     q.put(w)
     return dists
@@ -72,18 +76,11 @@ def shortest_path(s: V, t: V, get_neighbors: Callable[[V], Iterable[V]]):
     """
     Compute length of shortest path from source `s` to target `t`.
     """
-    q: SimpleQueue[V] = SimpleQueue()
-    q.put(s)
-    dists = {s: 0}
-    while not q.empty():
-        v = q.get()
-        for w in get_neighbors(v):
-            if w == t:
-                return dists[v] + 1
-            if w not in dists:
-                dists[w] = dists[v] + 1
-                q.put(w)
-    raise RuntimeError(f"{t} is not reachable from {s}")
+    dists = shortest_paths(s, t, get_neighbors)
+    if t in dists:
+        return dists[t]
+    else:
+        raise RuntimeError(f"{t} is not reachable from {s}")
 
 
 class IntGrid:

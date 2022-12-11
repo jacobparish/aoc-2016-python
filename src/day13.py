@@ -19,4 +19,4 @@ def get_neighbors(seed: int, x: int, y: int):
 
 seed = int(data)
 p1 = utils.shortest_path((1, 1), (31, 39), lambda v: get_neighbors(seed, *v))
-p2 = len(utils.shortest_paths((1, 1), lambda v: get_neighbors(seed, *v), 50))
+p2 = len(utils.shortest_paths((1, 1), None, lambda v: get_neighbors(seed, *v), 50))
